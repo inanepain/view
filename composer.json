@@ -1,0 +1,38 @@
+{
+	"name" : "inanepain/view",
+	"description" : "View layer with models for most common of content types.",
+	"type" : "library",
+	"license" : "UNLICENSE",
+	"authors" : [{
+			"name" : "Philip Michael Raab",
+			"email" : "peep@inane.co.za",
+			"role" : "Developer"
+		}
+	],
+	"homepage" : "https://inane.co.za",
+	"readme": "README.md",
+	"support" : {
+		"email" : "peep@inane.co.za",
+		"issues" : "https://inane.co.za"
+	},
+	"keywords" : [
+		"inane",
+		"view"
+	],
+	"autoload" : {
+		"psr-4" : {
+			"Inane\\View\\" : "src/"
+		}
+	},
+	"config": {
+        "preferred-install" : "dist",
+		"optimize-autoloader" : true,
+		"discard-changes" : true,
+		"sort-packages": true
+    },
+	"require" : {
+		"php" : ">=8.1"
+	},
+	"require-dev": {
+    }
+}
