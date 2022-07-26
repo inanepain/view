@@ -9,7 +9,7 @@
 			"role" : "Developer"
 		}
 	],
-	"homepage" : "https://inane.co.za",
+	"homepage" : "http://vaieen.local:8000/inane/view",
 	"readme": "README.md",
 	"support" : {
 		"email" : "peep@inane.co.za",
