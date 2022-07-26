@@ -1,1 +1,3 @@
 # Changelog: View
+
+> $Id$ ($Date$)
