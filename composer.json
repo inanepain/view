@@ -30,9 +30,10 @@
 		"discard-changes" : true,
 		"sort-packages": true
     },
-	"require" : {
-		"php" : ">=8.1"
-	},
 	"require-dev": {
-    }
+    },
+	"require" : {
+		"php" : ">=8.1",
+		"inanepain/stdlib": "* || dev-master || dev-develop"
+	}
 }
