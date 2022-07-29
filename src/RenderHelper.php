@@ -132,17 +132,16 @@ class RenderHelper {
      * @param array $array
      * @return self
      */
-    public static function fromArray(array $array = []): self {
+    public static function fromArray(array $array = []): static {
         $options = [
             'ext' => '.phtml',
             'template_stack' => [],
         ];
 
-        foreach ($options as $key => $val) {
+        foreach ($options as $key => $val)
             if (array_key_exists($key, $array)) $options[$key] = $array[$key];
-        }
 
-        return new self(...$options);
+        return new static(...$options);
     }
 
     public function partial(string $template, array $data = []): string {

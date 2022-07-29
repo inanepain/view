@@ -55,9 +55,8 @@ class RenderEngine {
      */
     public static function partial(/*$template, $variables*/) {
         // ensure the file exists
-        if (!file_exists(func_get_args()[0])) {
+        if (!file_exists(func_get_args()[0]))
             throw new Exception('Template File: ' . func_get_args()[0] . '<br/>Not Found!');
-        }
 
         // Make values in the associative array easier to access by extracting them
         if (is_array(func_get_args()[1]))
