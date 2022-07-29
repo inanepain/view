@@ -24,7 +24,17 @@ namespace Inane\View\Renderer;
 use Inane\View\Exception\RuntimeException;
 
 use function array_merge;
+use function array_shift;
+use function count;
+use function extract;
+use function glob;
+use function implode;
 use function is_array;
+use function is_null;
+use function ob_get_clean;
+use function ob_start;
+use const GLOB_BRACE;
+use const GLOB_NOSORT;
 
 /**
  * PhpRenderer
@@ -122,6 +132,26 @@ class PhpRenderer implements RendererInterface {
     }
 
     /**
+     * Resolve template against template stack
+     *
+     * @param string $template name
+     *
+     * @return string template file path
+     *
+     * @throws \Inane\View\Exception\RuntimeException Unable to resolve template
+     */
+    protected function resolve(string $template): string {
+        $paths = '{' . implode(',', $this->getTemplateStack()) . '}';
+        $extensions = '{' . implode(',', $this->getTemplateExtensions()) . '}';
+
+        $files = glob("$paths{/,/**/}$template$extensions", GLOB_NOSORT | GLOB_BRACE);
+
+        if (count($files) > 0) return array_shift($files);
+
+        throw new RuntimeException("Error: Unable to resolve template: `$template`");
+    }
+
+    /**
      * Render assigning $object to $this
      *
      * @param string    $template   name of template file
@@ -133,23 +163,17 @@ class PhpRenderer implements RendererInterface {
      * @throws \Inane\View\Exception\RuntimeException Template not found
      */
     public function render(string $template, array $data = [], ?object $thisObject = null): string {
-        $paths = '{' . implode(',', $this->getTemplateStack()) . '}';
-        $extensions = '{' . implode(',', $this->getTemplateExtensions()) . '}';
+        $file = $this->resolve($template);
 
-        $files = glob("$paths{/,/**/}$template$extensions", GLOB_NOSORT | GLOB_BRACE);
-
-        if (count($files) > 0) $template = array_shift($files);
-        else throw new RuntimeException("Error: Template not found: `$template`");
-
-        $parseTemplate = function ($template, $data) {
+        $parseTemplate = function ($templateFile, $variables) {
             ob_start();
-            extract($data);
-            include $template;
+            extract($variables);
+            include $templateFile;
             return ob_get_clean();
         };
 
-        if (!\is_null($thisObject)) $parseTemplate = $parseTemplate->bindTo($thisObject, $thisObject);
+        if (!is_null($thisObject)) $parseTemplate = $parseTemplate->bindTo($thisObject, $thisObject);
 
-        return $parseTemplate($template, $data);
+        return $parseTemplate($file, $data);
     }
 }
