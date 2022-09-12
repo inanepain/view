@@ -40,7 +40,7 @@ $data = [
 ];
 
 $sr = new StringRenderer([
-    'label' => '<label>{$label}</label',
+    'label' => '<label>{$label}</label>',
     'a' => '<a href="{$url}">{$title}</a>',
 ]);
 
