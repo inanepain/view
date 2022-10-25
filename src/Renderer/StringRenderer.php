@@ -9,6 +9,7 @@
  *
  * @author Philip Michael Raab <philip@inane.co.za>
  * @package Inane\View
+ * @category renderer
  *
  * @license UNLICENSE
  * @license https://github.com/inanepain/view/raw/develop/UNLICENSE UNLICENSE
@@ -35,7 +36,7 @@ use const false;
  *
  * @package Inane\View
  *
- * @version 0.1.0
+ * @version 0.2.0
  */
 class StringRenderer implements RendererInterface {
     /**
@@ -47,6 +48,8 @@ class StringRenderer implements RendererInterface {
 
     /**
      * StringRenderer Constructor
+     *
+     * @param array $templateStack templates to initialise renderer with
      *
      * @return void
      */
@@ -137,6 +140,32 @@ class StringRenderer implements RendererInterface {
         if ($useStack)
             $template = $this->templateStack->get($template);
 
+        return static::renderString($template, $data);
+    }
+
+    /**
+     * Render assigning $object to $this
+     *
+     * template:
+     *   <a href="{$url}">{$title}</a>
+     *
+     * data:
+     *   ['title' => 'Inane', 'url' => 'https://inane.co.za']
+     *
+     * output:
+     *   <a href="https://inane.co.za">Inane</a>
+     *
+     * @since 0.1.1 initial
+     * @since 0.2.0 renamed
+     *
+     * @param string    $template name of template file
+     * @param array     $data     array of variables to be made available in template
+     *
+     * @return string   rendered template
+     *
+     * @throws \Inane\View\Exception\RuntimeException Template not found
+     */
+    public static function renderTemplate(string $template, array $data = []): string {
         if (!$template) throw new RuntimeException("Error: Template invalid: `$template`");
 
         foreach (array_keys($data) as $field) {

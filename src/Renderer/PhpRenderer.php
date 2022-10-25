@@ -9,6 +9,7 @@
  *
  * @author Philip Michael Raab <philip@inane.co.za>
  * @package Inane\View
+ * @category render
  *
  * @license UNLICENSE
  * @license https://github.com/inanepain/view/raw/develop/UNLICENSE UNLICENSE
@@ -27,10 +28,12 @@ use function array_merge;
 use function array_shift;
 use function count;
 use function extract;
+use function file_exists;
 use function glob;
 use function implode;
 use function is_array;
 use function is_null;
+use function is_readable;
 use function ob_get_clean;
 use function ob_start;
 use const GLOB_BRACE;
@@ -44,7 +47,7 @@ use const GLOB_NOSORT;
  *
  * @package Inane\View
  *
- * @version 0.1.0
+ * @version 0.2.0
  */
 class PhpRenderer implements RendererInterface {
     /**
@@ -164,6 +167,26 @@ class PhpRenderer implements RendererInterface {
      */
     public function render(string $template, array $data = [], ?object $thisObject = null): string {
         $file = $this->resolve($template);
+
+        return static::renderFile($file, $data, $thisObject);
+    }
+
+    /**
+     * Render assigning $object to $this
+     *
+     * @since 0.2.0
+     *
+     * @param string    $file   template path
+     * @param array     $data       array of variables to be made available in template
+     * @param object    $object     optional $this object
+     *
+     * @return string   rendered template
+     *
+     * @throws \Inane\View\Exception\RuntimeException Template not found or readable
+     */
+    public static function renderTemplate(string $file, array $data = [], ?object $thisObject = null): string {
+        if (!file_exists($file)) throw new RuntimeException('Invalid => ' . $file . ': not found');
+        if (!is_readable($file)) throw new RuntimeException('Invalid => ' . $file . ': not readable');
 
         $parseTemplate = function ($templateFile, $variables) {
             ob_start();

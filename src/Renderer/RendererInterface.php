@@ -26,7 +26,7 @@ namespace Inane\View\Renderer;
  *
  * @package Inane\View
  *
- * @version 0.1.0
+ * @version 0.2.0
  */
 interface RendererInterface {
     /**
@@ -38,4 +38,16 @@ interface RendererInterface {
      * @return string rendered template
      */
     public function render(string $template, array $data = []): string;
+
+    /**
+     * Core render function
+     *
+     * @since 0.2.0
+     *
+     * @param string    $template   the template for renderer, could be a file path or string,...
+     * @param array     $data       data to populate template with
+     *
+     * @return string rendered string
+     */
+    public static function renderTemplate(string $template, array $data = []): string;
 }

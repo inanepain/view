@@ -4,6 +4,10 @@
 
 ## History
 
+### 0.2.0-dev @2022 Xxx xx
+
+ - new: `RendererInterface::renderTemplate` Core render function, takes resolved template and renders
+
 ### 0.1.1 @2022 Jul 29
 
  - Added a shiny new PhpRenderer
