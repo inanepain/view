@@ -140,7 +140,7 @@ class StringRenderer implements RendererInterface {
         if ($useStack)
             $template = $this->templateStack->get($template);
 
-        return static::renderString($template, $data);
+        return static::renderTemplate($template, $data);
     }
 
     /**
