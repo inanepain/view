@@ -168,7 +168,7 @@ class PhpRenderer implements RendererInterface {
     public function render(string $template, array $data = [], ?object $thisObject = null): string {
         $file = $this->resolve($template);
 
-        return static::renderFile($file, $data, $thisObject);
+        return static::renderTemplate($file, $data, $thisObject);
     }
 
     /**
