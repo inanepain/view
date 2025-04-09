@@ -43,7 +43,7 @@ use const GLOB_NOSORT;
  * PhpRenderer
  *
  * Renders php files.
- * Typically with the .phtml extension.
+ * Typically, with the .phtml extension.
  *
  * @package Inane\View
  *
