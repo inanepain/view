@@ -25,9 +25,20 @@ declare(strict_types=1);
 namespace Inane\View\Model;
 
 /**
- * Class HttpModel
+ * Class TextModel
  *
- * Model with renders items to HTML.
+ * Model with renders items to plain text.
  */
-class HttpModel extends AbstractModel {
+class TextModel extends AbstractModel {
+	/**
+	 * @var array http headers
+	 */
+	protected(set) array $headers = ['content-type' => 'plain/text'];
+
+    /**
+	 * @var bool
+	 */
+	protected(set) bool $useLayout = false;
+
+    protected string $template = '{text}';
 }

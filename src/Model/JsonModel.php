@@ -25,9 +25,13 @@ declare(strict_types=1);
 namespace Inane\View\Model;
 
 /**
- * Class HttpModel
+ * Class JsonModel
  *
- * Model with renders items to HTML.
+ * Model with renders items to json.
  */
-class HttpModel extends AbstractModel {
+class JsonModel extends AbstractModel {
+    /**
+	 * @var array http headers
+	 */
+	protected(set) array $headers = ['content-type' => 'application/json'];
 }

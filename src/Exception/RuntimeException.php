@@ -1,20 +1,23 @@
 <?php
 
 /**
- * Inane\View
+ * Inane: View
  *
- * View
+ * View layer with models for most common of content types.
  *
- * PHP version 8.1
+ * $Id$
+ * $Date$
  *
- * @package Inane\View
- * @author Philip Michael Raab<peep@inane.co.za>
+ * PHP version 8.4
+ *
+ * @author Philip Michael Raab<philip@cathedral.co.za>
+ * @package inanepain\view
+ * @category view
  *
  * @license UNLICENSE
- * @license https://github.com/inanepain/stdlib/raw/develop/UNLICENSE UNLICENSE
+ * @license https://unlicense.org/UNLICENSE UNLICENSE
  *
- * @version $Id$
- * $Date$
+ * _version_ $version
  */
 
 declare(strict_types=1);
@@ -25,8 +28,6 @@ use Inane\Stdlib\Exception\RuntimeException as InaneRuntimeException;
 
 /**
  * RuntimeException
- *
- * @package Inane\View
  *
  * @version 0.3.0
  */

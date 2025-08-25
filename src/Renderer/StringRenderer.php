@@ -3,19 +3,21 @@
 /**
  * Inane: View
  *
- * RenderEngine
+ * View layer with models for most common of content types.
  *
- * PHP Version 8.1
+ * $Id$
+ * $Date$
  *
- * @author Philip Michael Raab <philip@inane.co.za>
- * @package Inane\View
- * @category renderer
+ * PHP version 8.4
+ *
+ * @author Philip Michael Raab<philip@cathedral.co.za>
+ * @package inanepain\view
+ * @category view
  *
  * @license UNLICENSE
- * @license https://github.com/inanepain/view/raw/develop/UNLICENSE UNLICENSE
+ * @license https://unlicense.org/UNLICENSE UNLICENSE
  *
- * @version $Id$
- * $Date$
+ * _version_ $version
  */
 
 declare(strict_types=1);
@@ -33,8 +35,6 @@ use const false;
  * StringRenderer
  *
  * Renders strings.
- *
- * @package Inane\View
  *
  * @version 0.2.0
  */

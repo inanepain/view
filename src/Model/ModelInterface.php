@@ -17,7 +17,7 @@
  * @license UNLICENSE
  * @license https://unlicense.org/UNLICENSE UNLICENSE
  *
- * @version $version
+ * _version_ $version
  */
 
 declare(strict_types=1);
@@ -28,5 +28,4 @@ namespace Inane\View\Model;
  * Interface Model
  */
 interface ModelInterface {
-    
 }
