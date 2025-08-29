@@ -1,3 +1,8 @@
-Inane\View:
-	Rendering templates
-	- todo
+inanepain/view:
+	View layer with models for most common of content types.
+	View Models:
+		- Abstract Model
+			- HTML Model
+			- JSON Model
+			- Text Model
+		- View Manager
