@@ -6,3 +6,9 @@ inanepain/view:
 			- JSON Model
 			- Text Model
 		- View Manager
+		Elements:
+			A collection of html element objects
+			- HeadTitle
+			- HeadScript
+			- HeadStyle
+			- Anchor
