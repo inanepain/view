@@ -24,7 +24,17 @@ declare(strict_types=1);
 
 namespace Inane\View\Model;
 
-use Inane\Stdlib\Array\OptionsInterface;
+use Inane\Http\HttpStatus;
+use Inane\Stdlib\{
+	Array\OptionsInterface,
+	Options
+};
+
+use function array_key_exists;
+use function array_merge;
+use function in_array;
+use function is_array;
+use function property_exists;
 
 /**
  * Abstract Model Class
@@ -37,17 +47,40 @@ use Inane\Stdlib\Array\OptionsInterface;
  * - And the renderer used to compile everything
  */
 abstract class AbstractModel implements ModelInterface {
-    /**
-	 * @var int http response status
+	#region Option Properties
+	/**
+	 * The HTTP status associated with the model.
+	 * Defaults to HttpStatus::Ok.
+	 *
+	 * @var HttpStatus
 	 */
-	protected(set) int $status = 200;
+	protected(set) HttpStatus $httpStatus = HttpStatus::Ok;
 
 	/**
-	 * @var array http headers
+	 * @var int http response status
+	 */
+	protected(set) int $status {
+		get => $this->httpStatus->code();
+		set => $this->httpStatus = HttpStatus::from($value);
+	}
+
+	/**
+	 * Status message describing the current state or result.
+	 *
+	 * @var string
+	 */
+	public string $statusMessage {
+		get => $this->httpStatus->description();
+	}
+
+	/**
+	 * @var array<string, string|string[]> http headers
 	 */
 	protected(set) array $headers = [];
 
 	/**
+	 * Indicates whether the layout should be used when rendering views.
+	 *
 	 * @var bool
 	 */
 	protected(set) bool $useLayout = true;
@@ -57,27 +90,101 @@ abstract class AbstractModel implements ModelInterface {
 	 */
 	protected(set) string $renderer;
 
-    /**
-     * The name of the template associated with this model.
-     *
-     * @var string
-     */
-    protected string $template = '';
+	/**
+	 * The name of the template associated with this model.
+	 *
+	 * @var string
+	 */
+	protected string $template = '';
+	#endregion Option Properties
 
-    public function __construct(
-        /**
-         * @var array view variables
-         */
-        protected(set) array $variables = [],
-        /**
-         * @var array options model and renderer options
-         */
-        array|OptionsInterface $options = [],
-    ) {
-        $this->setOptions($options);
-    }
+	/**
+	 * @var array List of option property names for the model.
+	 */
+	protected array $optionProperties = [
+		'httpStatus',
+		'status',
+		'headers',
+		'useLayout',
+		'renderer',
+	];
 
-    /**
+	/**
+	 * Constructor for the AbstractModel class.
+	 *
+	 * Initializes the model instance with required dependencies or properties.
+	 *
+	 * @param mixed ...$args Arguments required for model initialization.
+	 */
+	public function __construct(
+		/**
+		 * @var array view variables
+		 */
+		protected(set) array $variables = [],
+		/**
+		 * @var array options model and renderer options
+		 */
+		array|OptionsInterface $options = [],
+	) {
+		$this->setOptions($options);
+	}
+
+	/**
+	 * get variable
+	 *
+	 * @param mixed $variable key
+	 * 
+	 * @return mixed value
+	 */
+	public function __get(mixed $variable) {
+		return $this->getVariable($variable);
+	}
+
+	#region Variable Methods
+	/**
+	 * Retrieves the value of a variable by its name.
+	 *
+	 * @param string $name The name of the variable to retrieve.
+	 * 
+	 * @return null|bool|string|array The value of the variable, which can be null, boolean, string, or array.
+	 */
+	public function getVariable(string $name): null|bool|string|array {
+		if (array_key_exists($name, $this->variables))
+			return $this->variables[$name];
+
+		return null;
+	}
+	#endregion Variable Methods
+
+	#region Option Methods
+	/**
+	 * Retrieves the options associated with the model.
+	 *
+	 * @return OptionsInterface The options object implementing OptionsInterface.
+	 */
+	public function getOptions(): OptionsInterface {
+		$options = new Options();
+		foreach ($this->optionProperties as $name)
+			$options->set($name, $this->getOption($name));
+
+		return $options;
+	}
+
+	/**
+	 * Retrieves the value of an option by its name.
+	 *
+	 * @param string $name The name of the option to retrieve.
+	 * 
+	 * @return null|bool|string|array The value of the option, which can be null, boolean, string, or array.
+	 */
+	public function getOption(string $name): null|bool|string|array {
+		if (property_exists($this, $name) && in_array($name, $this->optionProperties))
+			return $this->$name;
+
+		return null;
+	}
+
+	/**
 	 * Set options to generic values
 	 *
 	 * Only options not yet set via other means will be set
@@ -87,15 +194,26 @@ abstract class AbstractModel implements ModelInterface {
 	 * @return $this
 	 */
 	public function setOptions(array|OptionsInterface $options): self {
-		foreach ($options as $key => $value) {
-			if (property_exists($this, $key)) {
-				if ($key === 'headers' && is_array($value)) {
-					$this->headers = array_merge($this->headers, $value);
-					continue;
-				}
-				$this->$key = $value;
-			}
-		}
+		foreach ($options as $key => $value)
+			return $this->setOption($key, $value);
+
 		return $this;
 	}
+
+	/**
+	 * Sets an option for the model.
+	 *
+	 * @param string               $name  The name of the option to set.
+	 * @param bool|string|array    $value The value to assign to the option. Can be a boolean, string, or array.
+	 * 
+	 * @return self                Returns the current instance for method chaining.
+	 */
+	public function setOption(string $name, bool|string|array $value): self {
+		if (property_exists($this, $name) && in_array($name, $this->optionProperties))
+			if ($name === 'headers' && is_array($value)) $this->headers = array_merge($this->headers, $value);
+			else $this->$name = $value;
+
+		return $this;
+	}
+	#endregion Option Methods
 }

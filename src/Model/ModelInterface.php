@@ -24,8 +24,31 @@ declare(strict_types=1);
 
 namespace Inane\View\Model;
 
+use Inane\Stdlib\Array\OptionsInterface;
+
 /**
  * Interface Model
  */
 interface ModelInterface {
+    protected(set) bool $useLayout {
+        get;
+        set;
+    }
+
+    /**
+	 * Retrieves the options associated with the model.
+	 *
+	 * @return OptionsInterface The options object implementing OptionsInterface.
+	 */
+	public function getOptions(): OptionsInterface;
+    
+    /**
+	 * Sets an option for the model.
+	 *
+	 * @param string               $name  The name of the option to set.
+	 * @param bool|string|array    $value The value to assign to the option. Can be a boolean, string, or array.
+	 * 
+	 * @return self                Returns the current instance for method chaining.
+	 */
+	public function setOption(string $name, bool|string|array $value): self;
 }
