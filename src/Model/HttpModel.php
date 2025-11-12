@@ -28,6 +28,8 @@ use Inane\Stdlib\Array\OptionsInterface;
 use Inane\Stdlib\Options;
 use Inane\View\Renderer\PhpRenderer;
 
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use function array_merge;
 
 /**
@@ -63,15 +65,18 @@ class HttpModel extends AbstractModel {
     }
     #endregion Option Properties
 
-    /**
-	 * get variable
+	/**
+	 * get subview
 	 *
-	 * @param mixed $variable key
-	 * 
+	 * @param string $childName subview name
+	 *
 	 * @return mixed value
+	 *
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
 	 */
-	public function __get(mixed $variable) {
-		return $this->getVariable($variable) ?: (string)$this->children->get($variable);
+	public function __get(string $childName): mixed {
+		return (string)$this->children->get($childName);
 	}
 
     /**
@@ -82,12 +87,12 @@ class HttpModel extends AbstractModel {
     /**
      * Adds a child HttpModel to the current model with the specified name.
      *
-     * @param HttpModel $model The child HttpModel instance to add.
      * @param string $name The name to associate with the child model.
-     * 
+     * @param HttpModel $model The child HttpModel instance to add.
+     *
      * @return self Returns the current instance for method chaining.
      */
-    public function addChild(HttpModel $model, string $name): self {
+    public function addChild(string $name, HttpModel $model): self {
         $this->children->offsetSet($name, $model);
 
         return $this;

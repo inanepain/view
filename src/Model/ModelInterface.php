@@ -30,7 +30,10 @@ use Inane\Stdlib\Array\OptionsInterface;
  * Interface Model
  */
 interface ModelInterface {
-    protected(set) bool $useLayout {
+	/**
+	 * Represents whether the layout is used or not.
+	 */
+	protected(set) bool $useLayout {
         get;
         set;
     }
@@ -38,7 +41,7 @@ interface ModelInterface {
     /**
 	 * Retrieves the options associated with the model.
 	 *
-	 * @return OptionsInterface The options object implementing OptionsInterface.
+	 * @return OptionsInterface The Options object implementing OptionsInterface.
 	 */
 	public function getOptions(): OptionsInterface;
     

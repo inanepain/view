@@ -129,17 +129,6 @@ abstract class AbstractModel implements ModelInterface {
 		$this->setOptions($options);
 	}
 
-	/**
-	 * get variable
-	 *
-	 * @param mixed $variable key
-	 * 
-	 * @return mixed value
-	 */
-	public function __get(mixed $variable) {
-		return $this->getVariable($variable);
-	}
-
 	#region Variable Methods
 	/**
 	 * Retrieves the value of a variable by its name.
