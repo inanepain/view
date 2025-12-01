@@ -26,4 +26,14 @@
 
 <<<
 
-include::./part/install.adoc[leveloffset=+2]
+:leveloffset: +2
+
+= Install
+
+.composer
+[source,shell]
+====
+$ composer require {pkg-id}
+====
+
+:leveloffset!:

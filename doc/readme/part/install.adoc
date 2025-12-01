@@ -2,6 +2,6 @@
 
 .composer
 [source,shell]
-----
-composer require inanepain/view
-----
+====
+$ composer require {pkg-id}
+====

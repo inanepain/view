@@ -1,5 +1,5 @@
 inanepain/view:
-	View layer with models for most common of content types.
+	View layer with models for the most common content types.
 	View Models:
 		- Abstract Model
 			- HTML Model

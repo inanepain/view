@@ -3,7 +3,7 @@
 /**
  * Inane: View
  *
- * View layer with models for most common of content types.
+ * View layer with models for the most common content types.
  *
  * $Id$
  * $Date$

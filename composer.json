@@ -1,10 +1,10 @@
 {
     "name": "inanepain/view",
-    "description": "View layer with models for most common of content types.",
+    "description": "View layer with models for the most common content types.",
     "type": "library",
     "license": "Unlicense",
-    "homepage": "https://github.com/inanepain/view",
-    "readme": "README.md",
+    "homepage": "https://git.cathedral.co.za:3000/inanepain/view",
+    "readme": "README.adoc",
     "authors": [
         {
             "name": "Philip Michael Raab",
@@ -14,7 +14,7 @@
     ],
     "support": {
         "email": "philip@cathedral.co.za",
-        "issues": "https://github.com/inanepain"
+        "issues": "https://git.cathedral.co.za:3000/inanepain/view/issues"
     },
     "keywords": [
         "inanepain",
@@ -52,21 +52,33 @@
             "@build-changelog",
             "@build-readme"
         ],
+		"build-win": [
+			"@build-changelog-win",
+			"@build-readme-win"
+		],
         "build-changelog": [
             "rm -f CHANGELOG.adoc",
             "asciidoctor-reducer -o CHANGELOG.adoc doc/changelog/index.adoc",
             "asciidoctor -b docbook CHANGELOG.adoc",
-            "rm -f CHANGELOG.md",
-            "pandoc -f docbook -t markdown_strict CHANGELOG.xml -o CHANGELOG.md",
             "rm -f CHANGELOG.xml"
         ],
+		"build-changelog-win": [
+			"del CHANGELOG.adoc",
+			"asciidoctor-reducer -o CHANGELOG.adoc doc/changelog/index.adoc",
+			"asciidoctor -b docbook CHANGELOG.adoc",
+			"del CHANGELOG.xml"
+		],
         "build-readme": [
             "rm -f README.adoc",
             "asciidoctor-reducer -o README.adoc doc/readme/index.adoc",
             "asciidoctor -b docbook README.adoc",
-            "rm -f README.md",
-            "pandoc -f docbook -t markdown_strict README.xml -o README.md",
             "rm -f README.xml"
-        ]
+        ],
+		"build-readme-win": [
+			"del README.adoc",
+			"asciidoctor-reducer -o README.adoc doc/readme/index.adoc",
+			"asciidoctor -b docbook README.adoc",
+			"del README.xml"
+		]
     }
 }
