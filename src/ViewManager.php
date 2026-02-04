@@ -24,17 +24,8 @@ declare(strict_types=1);
 
 namespace Inane\View;
 
-use Inane\Config\ConfigAwareAttribute;
-use Inane\Config\ConfigAwareTrait;
-use Inane\Stdlib\Array\OptionsInterface;
-use Inane\Stdlib\Options;
-use Inane\View\Model\AbstractModel;
-use Inane\View\Model\HttpModel;
-use Inane\View\Renderer\PhpRenderer;
-
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
-use function array_merge;
+use Inane\Config\ConfigAware\ConfigAwareAttribute;
+use Inane\Config\ConfigAware\ConfigAwareTrait;
 
 /**
  * Class View
