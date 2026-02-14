@@ -1,8 +1,9 @@
-= view
+= inanepain/view image:./icon.png[title=inanepain/view,25]
 :author: Philip Michael Raab
 :email: <philip@cathedral.co.za>
-:keywords: php, inanepain, library, view, model, renderer, template, content, cms
 :description: View layer with models for the most common content types.
+:keywords: php, inanepain, library, view, model, renderer, template, content, cms
+:homepage: https://github.com/inanepain/view
 :revnumber: 0.1.0
 :revdate: 2025-10-29
 :copyright: Unlicense
@@ -22,7 +23,7 @@
 
 {description}
 
-:sectnums: |,all|
+:sectnums:
 
 <<<
 
