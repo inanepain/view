@@ -32,9 +32,9 @@
 = Install
 
 .composer
-[source,shell]
-====
-$ composer require {pkg-id}
-====
+[source,shell,subs=attributes+]
+----
+composer require {pkg-id}
+----
 
 :leveloffset!:
