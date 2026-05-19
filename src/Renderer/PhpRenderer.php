@@ -8,7 +8,7 @@
  * $Id$
  * $Date$
  *
- * PHP version 8.4
+ * PHP version 8.5
  *
  * @author Philip Michael Raab<philip@cathedral.co.za>
  * @package inanepain\view
@@ -38,6 +38,7 @@ use function is_null;
 use function is_readable;
 use function ob_get_clean;
 use function ob_start;
+
 use const GLOB_BRACE;
 use const GLOB_NOSORT;
 

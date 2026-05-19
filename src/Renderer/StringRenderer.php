@@ -8,7 +8,7 @@
  * $Id$
  * $Date$
  *
- * PHP version 8.4
+ * PHP version 8.5
  *
  * @author Philip Michael Raab<philip@cathedral.co.za>
  * @package inanepain\view
@@ -29,6 +29,7 @@ use Inane\View\Exception\RuntimeException;
 
 use function array_keys;
 use function preg_replace;
+
 use const false;
 
 /**

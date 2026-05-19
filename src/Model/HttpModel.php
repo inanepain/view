@@ -8,7 +8,7 @@
  * $Id$
  * $Date$
  *
- * PHP version 8.4
+ * PHP version 8.5
  *
  * @author Philip Michael Raab<philip@cathedral.co.za>
  * @package inanepain\view
@@ -27,9 +27,9 @@ namespace Inane\View\Model;
 use Inane\Stdlib\Array\OptionsInterface;
 use Inane\Stdlib\Options;
 use Inane\View\Renderer\PhpRenderer;
-
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+
 use function array_merge;
 
 /**
@@ -41,7 +41,7 @@ class HttpModel extends AbstractModel {
     #region Option Properties
     /**
      * The template string used for rendering views.
-     * 
+     *
      * @var string
      * @access protected (set)
      */

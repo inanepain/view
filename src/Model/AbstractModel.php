@@ -8,7 +8,7 @@
  * $Id$
  * $Date$
  *
- * PHP version 8.4
+ * PHP version 8.5
  *
  * @author Philip Michael Raab<philip@cathedral.co.za>
  * @package inanepain\view
@@ -26,9 +26,8 @@ namespace Inane\View\Model;
 
 use Inane\Http\HttpStatus;
 use Inane\Stdlib\{
-	Array\OptionsInterface,
-	Options
-};
+    Array\OptionsInterface,
+    Options};
 
 use function array_key_exists;
 use function array_merge;
@@ -38,9 +37,9 @@ use function property_exists;
 
 /**
  * Abstract Model Class
- * 
+ *
  * Models are the glue and coordinators for the various items that are used to compile a specific output type.
- * 
+ *
  * Generally these are the components used:
  * - Variables Container
  * - Which, if any, template to use
@@ -134,7 +133,7 @@ abstract class AbstractModel implements ModelInterface {
 	 * Retrieves the value of a variable by its name.
 	 *
 	 * @param string $name The name of the variable to retrieve.
-	 * 
+	 *
 	 * @return null|bool|string|array The value of the variable, which can be null, boolean, string, or array.
 	 */
 	public function getVariable(string $name): null|bool|string|array {
@@ -163,7 +162,7 @@ abstract class AbstractModel implements ModelInterface {
 	 * Retrieves the value of an option by its name.
 	 *
 	 * @param string $name The name of the option to retrieve.
-	 * 
+	 *
 	 * @return null|bool|string|array The value of the option, which can be null, boolean, string, or array.
 	 */
 	public function getOption(string $name): null|bool|string|array {
@@ -194,7 +193,7 @@ abstract class AbstractModel implements ModelInterface {
 	 *
 	 * @param string               $name  The name of the option to set.
 	 * @param bool|string|array    $value The value to assign to the option. Can be a boolean, string, or array.
-	 * 
+	 *
 	 * @return self                Returns the current instance for method chaining.
 	 */
 	public function setOption(string $name, bool|string|array $value): self {
