@@ -12,5 +12,5 @@
 :sectanchors:
 
 * new: `RendererInterface::renderTemplate` Core render function, takes resolved template and renders
-* new: A view the utilises models, veriables and renderers to build views
+* new: A view that uses models, variables and renderers to build views
 * new: the new view structure is easy to extend to add bells and whistles
