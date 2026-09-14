@@ -111,7 +111,7 @@ abstract class AbstractModel implements ModelInterface {
 	/**
 	 * Constructor for the AbstractModel class.
 	 *
-	 * Initializes the model instance with required dependencies or properties.
+	 * Initialises the model instance with required dependencies or properties.
 	 *
 	 * @param mixed ...$args Arguments required for model initialization.
 	 */
