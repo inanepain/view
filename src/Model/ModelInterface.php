@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace Inane\View\Model;
 
+use Inane\Http\HttpStatus;
 use Inane\Stdlib\Array\OptionsInterface;
 
 /**
@@ -49,9 +50,12 @@ interface ModelInterface {
 	 * Sets an option for the model.
 	 *
 	 * @param string               $name  The name of the option to set.
-	 * @param bool|string|array    $value The value to assign to the option. Can be a boolean, string, or array.
+	 * @param HttpStatus|bool|int|string|array $value Model option value.
 	 * 
 	 * @return self                Returns the current instance for method chaining.
+	 *
+	 * @throws \TypeError If the option has an incompatible value.
+	 * @throws \ValueError If the HTTP status is invalid.
 	 */
-	public function setOption(string $name, bool|string|array $value): self;
+	public function setOption(string $name, HttpStatus|bool|int|string|array $value): self;
 }

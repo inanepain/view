@@ -60,7 +60,9 @@ abstract class AbstractModel implements ModelInterface {
 	 */
 	protected(set) int $status {
 		get => $this->httpStatus->value;
-		set => $this->httpStatus = HttpStatus::from($value);
+		set {
+			$this->httpStatus = HttpStatus::from($value);
+		}
 	}
 
 	/**
@@ -150,6 +152,8 @@ abstract class AbstractModel implements ModelInterface {
 	 * Retrieves the options associated with the model.
 	 *
 	 * @return OptionsInterface The options object implementing OptionsInterface.
+	 *
+	 * @throws \Error If a model option is uninitialised.
 	 */
 	public function getOptions(): OptionsInterface {
 		$options = new Options();
@@ -164,9 +168,11 @@ abstract class AbstractModel implements ModelInterface {
 	 *
 	 * @param string $name The name of the option to retrieve.
 	 *
-	 * @return null|bool|string|array The value of the option, which can be null, boolean, string, or array.
+	 * @return HttpStatus|null|bool|int|string|array Model option value.
+	 *
+	 * @throws \Error If a model option is uninitialised.
 	 */
-	public function getOption(string $name): null|bool|string|array {
+	public function getOption(string $name): HttpStatus|null|bool|int|string|array {
 		if (property_exists($this, $name) && in_array($name, $this->optionProperties))
 			return $this->$name;
 
@@ -178,13 +184,15 @@ abstract class AbstractModel implements ModelInterface {
 	 *
 	 * Only options not yet set via other means will be set
 	 *
-	 * @param array<string, bool|string|array>|OptionsInterface $options Model options.
+	 * @param array<string, HttpStatus|bool|int|string|array>|OptionsInterface $options Model options.
 	 *
 	 * @return $this
 	 *
 	 * @throws \TypeError If an option has an incompatible value.
+	 * @throws \ValueError If the HTTP status is invalid.
 	 */
 	public function setOptions(array|OptionsInterface $options): self {
+		if ($options instanceof OptionsInterface) $options = $options->toArray();
 		foreach ($options as $key => $value)
 			$this->setOption($key, $value);
 
@@ -195,11 +203,14 @@ abstract class AbstractModel implements ModelInterface {
 	 * Sets an option for the model.
 	 *
 	 * @param string               $name  The name of the option to set.
-	 * @param bool|string|array    $value The value to assign to the option. Can be a boolean, string, or array.
+	 * @param HttpStatus|bool|int|string|array $value Model option value.
 	 *
 	 * @return self                Returns the current instance for method chaining.
+	 *
+	 * @throws \TypeError If the option has an incompatible value.
+	 * @throws \ValueError If the HTTP status is invalid.
 	 */
-	public function setOption(string $name, bool|string|array $value): self {
+	public function setOption(string $name, HttpStatus|bool|int|string|array $value): self {
 		if (property_exists($this, $name) && in_array($name, $this->optionProperties))
 			if ($name === 'headers' && is_array($value)) $this->headers = array_merge($this->headers, $value);
 			else $this->$name = $value;
