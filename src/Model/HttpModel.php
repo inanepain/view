@@ -26,10 +26,11 @@ namespace Inane\View\Model;
 
 use Inane\Stdlib\Array\OptionsInterface;
 use Inane\Stdlib\Options;
+use Inane\View\Exception\RuntimeException;
 use Inane\View\Renderer\PhpRenderer;
 use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 
+use function array_key_exists;
 use function array_merge;
 
 /**
@@ -38,6 +39,8 @@ use function array_merge;
  * Model with renders items to HTML.
  */
 class HttpModel extends AbstractModel {
+    private bool $rendering = false;
+    private array $renderedChildren = [];
     #region Option Properties
     /**
      * The template string used for rendering views.
@@ -47,12 +50,6 @@ class HttpModel extends AbstractModel {
      */
     protected(set) string $template = '';
 
-    /**
-	 * @var array List of option property names for the model.
-	 */
-	protected array $optionProperties {
-        get => array_merge($this->optionProperties, ['template']);
-    }
 
     /**
      * Represents the child options for the model.
@@ -70,13 +67,15 @@ class HttpModel extends AbstractModel {
 	 *
 	 * @param string $childName subview name
 	 *
-	 * @return mixed value
+	 * @return string Rendered child output.
 	 *
-	 * @throws ContainerExceptionInterface
-	 * @throws NotFoundExceptionInterface
+	 * @throws RuntimeException If the child is unavailable outside rendering.
 	 */
-	public function __get(string $childName): mixed {
-		return (string)$this->children->get($childName);
+	public function __get(string $childName): string {
+        if (!array_key_exists($childName, $this->renderedChildren))
+            throw new RuntimeException("Rendered child unavailable: `$childName`");
+
+        return $this->renderedChildren[$childName];
 	}
 
     /**
@@ -91,10 +90,42 @@ class HttpModel extends AbstractModel {
      * @param HttpModel $model The child HttpModel instance to add.
      *
      * @return self Returns the current instance for method chaining.
+     *
+     * @throws ContainerExceptionInterface If the child cannot be stored.
      */
     public function addChild(string $name, HttpModel $model): self {
         $this->children->offsetSet($name, $model);
 
         return $this;
+    }
+
+    /**
+     * Renders children before the parent, without changing model variables.
+     *
+     * @param PhpRenderer $renderer Renderer used throughout the tree.
+     * @param array<string, mixed> $data Overrides containing arbitrary template variables.
+     *
+     * @return string Rendered model.
+     *
+     * @throws RuntimeException If a circular tree or invalid template is encountered.
+     * @throws \Throwable If template execution fails.
+     */
+    public function render(PhpRenderer $renderer, array $data = []): string {
+        if ($this->rendering) throw new RuntimeException('Circular view model tree.');
+
+        $this->rendering = true;
+        try {
+            $context = clone $this;
+            $context->renderedChildren = [];
+            $context->variables = array_merge($this->variables, $data);
+            foreach ($this->children as $name => $child)
+                $context->renderedChildren[$name] = $child->render($renderer, array_merge($context->variables, $child->variables));
+
+            $context->variables = array_merge($context->variables, $context->renderedChildren);
+
+            return $renderer->render($this->template, $context->variables, $context);
+        } finally {
+            $this->rendering = false;
+        }
     }
 }

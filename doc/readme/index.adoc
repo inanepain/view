@@ -30,3 +30,4 @@
 <<<
 
 include::./part/install.adoc[leveloffset=+2]
+include::./part/rendering.adoc[leveloffset=+2]

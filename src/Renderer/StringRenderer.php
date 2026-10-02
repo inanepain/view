@@ -27,8 +27,9 @@ namespace Inane\View\Renderer;
 use Inane\Stdlib\Options;
 use Inane\View\Exception\RuntimeException;
 
-use function array_keys;
+use function is_scalar;
 use function preg_replace;
+use function strtr;
 
 use const false;
 
@@ -40,6 +41,7 @@ use const false;
  * @version 0.2.0
  */
 class StringRenderer implements RendererInterface {
+    use PartialRendererTrait;
     /**
      * Templates stored by name
      *
@@ -118,63 +120,60 @@ class StringRenderer implements RendererInterface {
     }
 
     /**
-     * Render assigning $object to $this
+     * Renders a literal string or a named template from the stack.
      *
-     * template:
-     *   <a href="{$url}">{$title}</a>
+     * @param string $template Template string or name.
+     * @param array<string, mixed> $data Arbitrary scalar or stringable template variables.
+     * @param bool $useStack Whether to resolve the template name.
      *
-     * data:
-     *   ['title' => 'Inane', 'url' => 'https://inane.co.za']
+     * @return string Rendered template.
      *
-     * output:
-     *   <a href="https://inane.co.za">Inane</a>
-     *
-     * @param string    $template name of template file
-     * @param array     $data     array of variables to be made available in template
-     * @param bool      $useStack $template is the name of a template on the stack
-     *
-     * @return string   rendered template
-     *
-     * @throws \Inane\View\Exception\RuntimeException Template not found
+     * @throws RuntimeException If the template or a variable is invalid.
      */
     public function render(string $template, array $data = [], bool $useStack = false): string {
-        if ($useStack)
+        if ($useStack) {
+            if (!$this->templateStack->has($template)) throw new RuntimeException("Error: Template not found: `$template`");
             $template = $this->templateStack->get($template);
+            if (!is_string($template)) throw new RuntimeException('String templates must be strings.');
+        }
 
         return static::renderTemplate($template, $data);
     }
 
     /**
-     * Render assigning $object to $this
+     * Renders a named string partial.
      *
-     * template:
-     *   <a href="{$url}">{$title}</a>
+     * @param string $template Template name on the stack.
+     * @param array<string, mixed> $data Arbitrary scalar or stringable template variables.
      *
-     * data:
-     *   ['title' => 'Inane', 'url' => 'https://inane.co.za']
+     * @return string Rendered partial.
      *
-     * output:
-     *   <a href="https://inane.co.za">Inane</a>
+     * @throws RuntimeException If the template or a variable is invalid.
+     */
+    public function renderPartial(string $template, array $data = []): string {
+        return $this->render($template, $data, true);
+    }
+
+    /**
+     * Replaces placeholders literally, without reprocessing inserted output.
      *
-     * @since 0.1.1 initial
-     * @since 0.2.0 renamed
+     * @param string $template Template string.
+     * @param array<string, mixed> $data Arbitrary scalar or stringable template variables.
      *
-     * @param string    $template name of template file
-     * @param array     $data     array of variables to be made available in template
+     * @return string Rendered template.
      *
-     * @return string   rendered template
-     *
-     * @throws \Inane\View\Exception\RuntimeException Template not found
+     * @throws RuntimeException If the template or a variable is invalid.
      */
     public static function renderTemplate(string $template, array $data = []): string {
-        if (!$template) throw new RuntimeException("Error: Template invalid: `$template`");
+        if ($template === '') throw new RuntimeException("Error: Template invalid: `$template`");
 
-        foreach (array_keys($data) as $field) {
-            $replace = $data[$field];
-            $pattern = '/\{\$' . $field . '\}/';
-            $template = preg_replace($pattern, static::pregEscapeBack($replace), $template);
+        $replacements = [];
+        foreach ($data as $field => $value) {
+            if ($value !== null && !is_scalar($value) && !$value instanceof \Stringable)
+                throw new RuntimeException('String template variables must be scalar, null or stringable.');
+            $replacements['{$' . $field . '}'] = (string)$value;
         }
 
-        return $template;
+        return strtr($template, $replacements);
     }
 }

@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace Inane\View\Renderer;
 
 use Inane\View\Exception\RuntimeException;
+use ReflectionClass;
 
 use function array_merge;
 use function array_shift;
@@ -36,9 +37,13 @@ use function implode;
 use function is_array;
 use function is_null;
 use function is_readable;
+use function ob_end_clean;
+use function ob_end_flush;
 use function ob_get_clean;
+use function ob_get_level;
 use function ob_start;
 
+use const EXTR_SKIP;
 use const GLOB_BRACE;
 use const GLOB_NOSORT;
 
@@ -51,6 +56,7 @@ use const GLOB_NOSORT;
  * @version 0.2.0
  */
 class PhpRenderer implements RendererInterface {
+    use PartialRendererTrait;
     /**
      * Directories used to find a match when requesting a template
      *
@@ -156,47 +162,58 @@ class PhpRenderer implements RendererInterface {
     }
 
     /**
-     * Render assigning $object to $this
+     * Renders a template, binding the renderer unless an object is supplied.
      *
-     * @param string    $template   name of template file
-     * @param array     $data       array of variables to be made available in template
-     * @param object    $object     optional $this object
+     * @param string $template Template name.
+     * @param array<string, mixed> $data Arbitrary template variables.
+     * @param object|null $thisObject Optional template context.
      *
-     * @return string   rendered template
+     * @return string Rendered template.
      *
-     * @throws \Inane\View\Exception\RuntimeException Template not found
+     * @throws RuntimeException If the template cannot be resolved or read.
+     * @throws \Throwable If template execution fails.
      */
     public function render(string $template, array $data = [], ?object $thisObject = null): string {
         $file = $this->resolve($template);
 
-        return static::renderTemplate($file, $data, $thisObject);
+        return static::renderTemplate($file, $data, $thisObject ?? $this);
     }
 
     /**
-     * Render assigning $object to $this
+     * Executes a template file with isolated, exception-safe output buffering.
      *
-     * @since 0.2.0
+     * @param string $file Template file path.
+     * @param array<string, mixed> $data Arbitrary template variables.
+     * @param object|null $thisObject Optional template context.
      *
-     * @param string    $file   template path
-     * @param array     $data       array of variables to be made available in template
-     * @param object    $object     optional $this object
+     * @return string Rendered template.
      *
-     * @return string   rendered template
-     *
-     * @throws \Inane\View\Exception\RuntimeException Template not found or readable
+     * @throws RuntimeException If the file cannot be read or binding fails.
+     * @throws \Throwable If template execution fails.
      */
     public static function renderTemplate(string $file, array $data = [], ?object $thisObject = null): string {
         if (!file_exists($file)) throw new RuntimeException('Invalid => ' . $file . ': not found');
         if (!is_readable($file)) throw new RuntimeException('Invalid => ' . $file . ': not readable');
 
-        $parseTemplate = function ($templateFile, $variables) {
+        $parseTemplate = function (string $templateFile, array $variables): string {
+            $bufferLevel = ob_get_level();
             ob_start();
-            extract($variables);
-            include $templateFile;
-            return ob_get_clean();
+            try {
+                extract($variables, EXTR_SKIP);
+                include $templateFile;
+                while (ob_get_level() > $bufferLevel + 1) ob_end_flush();
+
+                return (string)ob_get_clean();
+            } finally {
+                while (ob_get_level() > $bufferLevel) ob_end_clean();
+            }
         };
 
-        if (!is_null($thisObject)) $parseTemplate = $parseTemplate->bindTo($thisObject, $thisObject);
+        if (!is_null($thisObject)) {
+            $scope = new ReflectionClass($thisObject)->isInternal() ? null : $thisObject;
+            $parseTemplate = $parseTemplate->bindTo($thisObject, $scope);
+        }
+        if ($parseTemplate === null) throw new RuntimeException('Unable to bind the template object.');
 
         return $parseTemplate($file, $data);
     }

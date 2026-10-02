@@ -59,7 +59,7 @@ abstract class AbstractModel implements ModelInterface {
 	 * @var int http response status
 	 */
 	protected(set) int $status {
-		get => $this->httpStatus->code();
+		get => $this->httpStatus->value;
 		set => $this->httpStatus = HttpStatus::from($value);
 	}
 
@@ -69,7 +69,7 @@ abstract class AbstractModel implements ModelInterface {
 	 * @var string
 	 */
 	public string $statusMessage {
-		get => $this->httpStatus->description();
+		get => $this->httpStatus->message();
 	}
 
 	/**
@@ -106,6 +106,7 @@ abstract class AbstractModel implements ModelInterface {
 		'headers',
 		'useLayout',
 		'renderer',
+		'template',
 	];
 
 	/**
@@ -177,13 +178,15 @@ abstract class AbstractModel implements ModelInterface {
 	 *
 	 * Only options not yet set via other means will be set
 	 *
-	 * @param   array|OptionsInterface|  $options
+	 * @param array<string, bool|string|array>|OptionsInterface $options Model options.
 	 *
 	 * @return $this
+	 *
+	 * @throws \TypeError If an option has an incompatible value.
 	 */
 	public function setOptions(array|OptionsInterface $options): self {
 		foreach ($options as $key => $value)
-			return $this->setOption($key, $value);
+			$this->setOption($key, $value);
 
 		return $this;
 	}

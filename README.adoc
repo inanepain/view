@@ -40,3 +40,28 @@ composer require {pkg-id}
 ----
 
 :leveloffset!:
+:leveloffset: +2
+
+= Nested and Iterative Views
+
+== Renderer Partials
+
+`PhpRenderer` and `StringRenderer` provide `renderPartial` for a named template and `renderEach` for a collection of variable arrays. Partials use the renderer's existing template stack. The existing `render` and static `renderTemplate` entry points remain available; `StringRenderer::render` still treats its template as a literal string unless `useStack` is enabled.
+
+`renderEach` accepts arrays and traversable collections, including generators, and concatenates output in iteration order. Its optional shared variables are overridden by each item's variables. Item variables do not leak into subsequent iterations. An empty collection produces an empty string; a non-array item throws `Inane\View\Exception\RuntimeException`.
+
+PHP templates rendered without an explicit context object have the renderer available as `$this`, including `renderPartial` and `renderEach`. Supplying a context object retains that object binding instead. Static file rendering only binds an object when one is supplied. PHP templates are trusted executable code, not a sandbox. The internal variable names `templateFile`, `variables` and `bufferLevel` are reserved during file rendering.
+
+String templates retain the `{$name}` placeholder syntax. Values may be scalar, null or stringable. Inserted output is literal: backslashes, dollar signs and placeholders within child output are not interpreted again. Unknown placeholders are retained. Render child partials first and pass their output as parent variables. Output is not automatically HTML-escaped.
+
+== Model Trees
+
+`HttpModel::addChild` attaches a named child model. `HttpModel::render` renders children recursively before rendering the parent with a configured `PhpRenderer`. Alternatively, initialise `ViewManager` with that renderer and pass the root model to its `render` method.
+
+Child output is available both as a variable bearing the child's name and through `$this` on the bound model context. Rendered children override parent variables with the same name. Children inherit parent variables, including iteration variables, but explicitly supplied child variables take precedence. Child-property access outside a rendering context throws `Inane\View\Exception\RuntimeException`.
+
+`IterativeModel` extends `HttpModel` and accepts `items`, shared `variables` and model `options`. Each item is an array of template variables; its values override shared defaults. Every item renders the model's template and child tree, and the resulting strings are concatenated. Iterables are materialised at construction so even generator-backed models can be rendered repeatedly. An empty model produces an empty string.
+
+Models retain their original variables and child models after rendering. Circular model trees throw `Inane\View\Exception\RuntimeException`. Rendering exceptions propagate, output buffers are cleaned, and models can be retried after correcting the failure. Layout and HTTP response handling are not performed by these rendering methods.
+
+:leveloffset!:
