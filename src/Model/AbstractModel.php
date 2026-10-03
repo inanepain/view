@@ -46,176 +46,176 @@ use function property_exists;
  * - And the renderer used to compile everything
  */
 abstract class AbstractModel implements ModelInterface {
-	#region Option Properties
-	/**
-	 * The HTTP status associated with the model.
-	 * Defaults to HttpStatus::Ok.
-	 *
-	 * @var HttpStatus
-	 */
-	protected(set) HttpStatus $httpStatus = HttpStatus::Ok;
+    #region Option Properties
+    /**
+     * The HTTP status associated with the model.
+     * Defaults to HttpStatus::Ok.
+     *
+     * @var HttpStatus
+     */
+    protected(set) HttpStatus $httpStatus = HttpStatus::Ok;
 
-	/**
-	 * @var int http response status
-	 */
-	protected(set) int $status {
-		get => $this->httpStatus->value;
-		set {
-			$this->httpStatus = HttpStatus::from($value);
-		}
-	}
+    /**
+     * @var int http response status
+     */
+    protected(set) int $status {
+        get => $this->httpStatus->value;
+        set {
+            $this->httpStatus = HttpStatus::from($value);
+        }
+    }
 
-	/**
-	 * Status message describing the current state or result.
-	 *
-	 * @var string
-	 */
-	public string $statusMessage {
-		get => $this->httpStatus->message();
-	}
+    /**
+     * Status message describing the current state or result.
+     *
+     * @var string
+     */
+    public string $statusMessage {
+        get => $this->httpStatus->message();
+    }
 
-	/**
-	 * @var array<string, string|string[]> http headers
-	 */
-	protected(set) array $headers = [];
+    /**
+     * @var array<string, string|string[]> http headers
+     */
+    protected(set) array $headers = [];
 
-	/**
-	 * Indicates whether the layout should be used when rendering views.
-	 *
-	 * @var bool
-	 */
-	protected(set) bool $useLayout = true;
+    /**
+     * Indicates whether the layout should be used when rendering views.
+     *
+     * @var bool
+     */
+    protected(set) bool $useLayout = true;
 
-	/**
-	 * @var string
-	 */
-	protected(set) string $renderer;
+    /**
+     * @var string
+     */
+    protected(set) string $renderer;
 
-	/**
-	 * The name of the template associated with this model.
-	 *
-	 * @var string
-	 */
-	protected string $template = '';
-	#endregion Option Properties
+    /**
+     * The name of the template associated with this model.
+     *
+     * @var string
+     */
+    protected string $template = '';
+    #endregion Option Properties
 
-	/**
-	 * @var array List of option property names for the model.
-	 */
-	protected array $optionProperties = [
-		'httpStatus',
-		'status',
-		'headers',
-		'useLayout',
-		'renderer',
-		'template',
-	];
+    /**
+     * @var array List of option property names for the model.
+     */
+    protected array $optionProperties = [
+        'httpStatus',
+        'status',
+        'headers',
+        'useLayout',
+        'renderer',
+        'template',
+    ];
 
-	/**
-	 * Constructor for the AbstractModel class.
-	 *
-	 * Initialises the model instance with required dependencies or properties.
-	 *
-	 * @param mixed ...$args Arguments required for model initialization.
-	 */
-	public function __construct(
-		/**
-		 * @var array view variables
-		 */
-		protected(set) array $variables = [],
-		/**
-		 * @var array options model and renderer options
-		 */
-		array|OptionsInterface $options = [],
-	) {
-		$this->setOptions($options);
-	}
+    /**
+     * Constructor for the AbstractModel class.
+     *
+     * Initialises the model instance with required dependencies or properties.
+     *
+     * @param mixed ...$args Arguments required for model initialization.
+     */
+    public function __construct(
+        /**
+         * @var array view variables
+         */
+        protected(set) array $variables = [],
+        /**
+         * @var array options model and renderer options
+         */
+        array|OptionsInterface $options = [],
+    ) {
+        $this->setOptions($options);
+    }
 
-	#region Variable Methods
-	/**
-	 * Retrieves the value of a variable by its name.
-	 *
-	 * @param string $name The name of the variable to retrieve.
-	 *
-	 * @return null|bool|string|array The value of the variable, which can be null, boolean, string, or array.
-	 */
-	public function getVariable(string $name): null|bool|string|array {
-		if (array_key_exists($name, $this->variables))
-			return $this->variables[$name];
+    #region Variable Methods
+    /**
+     * Retrieves the value of a variable by its name.
+     *
+     * @param string $name The name of the variable to retrieve.
+     *
+     * @return null|bool|string|array The value of the variable, which can be null, boolean, string, or array.
+     */
+    public function getVariable(string $name): null|bool|string|array {
+        if (array_key_exists($name, $this->variables))
+            return $this->variables[$name];
 
-		return null;
-	}
-	#endregion Variable Methods
+        return null;
+    }
+    #endregion Variable Methods
 
-	#region Option Methods
-	/**
-	 * Retrieves the options associated with the model.
-	 *
-	 * @return OptionsInterface The options object implementing OptionsInterface.
-	 *
-	 * @throws \Error If a model option is uninitialised.
-	 */
-	public function getOptions(): OptionsInterface {
-		$options = new Options();
-		foreach ($this->optionProperties as $name)
-			$options->set($name, $this->getOption($name));
+    #region Option Methods
+    /**
+     * Retrieves the options associated with the model.
+     *
+     * @return OptionsInterface The options object implementing OptionsInterface.
+     *
+     * @throws \Error If a model option is uninitialised.
+     */
+    public function getOptions(): OptionsInterface {
+        $options = new Options();
+        foreach ($this->optionProperties as $name)
+            $options->set($name, $this->getOption($name));
 
-		return $options;
-	}
+        return $options;
+    }
 
-	/**
-	 * Retrieves the value of an option by its name.
-	 *
-	 * @param string $name The name of the option to retrieve.
-	 *
-	 * @return HttpStatus|null|bool|int|string|array Model option value.
-	 *
-	 * @throws \Error If a model option is uninitialised.
-	 */
-	public function getOption(string $name): HttpStatus|null|bool|int|string|array {
-		if (property_exists($this, $name) && in_array($name, $this->optionProperties))
-			return $this->$name;
+    /**
+     * Retrieves the value of an option by its name.
+     *
+     * @param string $name The name of the option to retrieve.
+     *
+     * @return HttpStatus|null|bool|int|string|array Model option value.
+     *
+     * @throws \Error If a model option is uninitialised.
+     */
+    public function getOption(string $name): HttpStatus|null|bool|int|string|array {
+        if (property_exists($this, $name) && in_array($name, $this->optionProperties))
+            return $this->$name;
 
-		return null;
-	}
+        return null;
+    }
 
-	/**
-	 * Set options to generic values
-	 *
-	 * Only options not yet set via other means will be set
-	 *
-	 * @param array<string, HttpStatus|bool|int|string|array>|OptionsInterface $options Model options.
-	 *
-	 * @return $this
-	 *
-	 * @throws \TypeError If an option has an incompatible value.
-	 * @throws \ValueError If the HTTP status is invalid.
-	 */
-	public function setOptions(array|OptionsInterface $options): self {
-		if ($options instanceof OptionsInterface) $options = $options->toArray();
-		foreach ($options as $key => $value)
-			$this->setOption($key, $value);
+    /**
+     * Set options to generic values
+     *
+     * Only options not yet set via other means will be set
+     *
+     * @param array<string, HttpStatus|bool|int|string|array>|OptionsInterface $options Model options.
+     *
+     * @return $this
+     *
+     * @throws \TypeError If an option has an incompatible value.
+     * @throws \ValueError If the HTTP status is invalid.
+     */
+    public function setOptions(array|OptionsInterface $options): self {
+        if ($options instanceof OptionsInterface) $options = $options->toArray();
+        foreach ($options as $key => $value)
+            $this->setOption($key, $value);
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Sets an option for the model.
-	 *
-	 * @param string               $name  The name of the option to set.
-	 * @param HttpStatus|bool|int|string|array $value Model option value.
-	 *
-	 * @return self                Returns the current instance for method chaining.
-	 *
-	 * @throws \TypeError If the option has an incompatible value.
-	 * @throws \ValueError If the HTTP status is invalid.
-	 */
-	public function setOption(string $name, HttpStatus|bool|int|string|array $value): self {
-		if (property_exists($this, $name) && in_array($name, $this->optionProperties))
-			if ($name === 'headers' && is_array($value)) $this->headers = array_merge($this->headers, $value);
-			else $this->$name = $value;
+    /**
+     * Sets an option for the model.
+     *
+     * @param string               $name  The name of the option to set.
+     * @param HttpStatus|bool|int|string|array $value Model option value.
+     *
+     * @return self                Returns the current instance for method chaining.
+     *
+     * @throws \TypeError If the option has an incompatible value.
+     * @throws \ValueError If the HTTP status is invalid.
+     */
+    public function setOption(string $name, HttpStatus|bool|int|string|array $value): self {
+        if (property_exists($this, $name) && in_array($name, $this->optionProperties))
+            if ($name === 'headers' && is_array($value)) $this->headers = array_merge($this->headers, $value);
+            else $this->$name = $value;
 
-		return $this;
-	}
-	#endregion Option Methods
+        return $this;
+    }
+    #endregion Option Methods
 }

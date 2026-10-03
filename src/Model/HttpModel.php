@@ -32,6 +32,10 @@ use Psr\Container\ContainerExceptionInterface;
 
 use function array_key_exists;
 use function array_merge;
+use function htmlspecialchars;
+
+use const ENT_QUOTES;
+use const ENT_SUBSTITUTE;
 
 /**
  * Class HttpModel
@@ -62,26 +66,30 @@ class HttpModel extends AbstractModel {
     }
     #endregion Option Properties
 
-	/**
-	 * get subview
-	 *
-	 * @param string $childName subview name
-	 *
-	 * @return string Rendered child output.
-	 *
-	 * @throws RuntimeException If the child is unavailable outside rendering.
-	 */
-	public function __get(string $childName): string {
+    /**
+     * get subview
+     *
+     * @param string $childName subview name
+     *
+     * @return string Rendered child output.
+     *
+     * @throws RuntimeException If the child is unavailable outside rendering.
+     * @noinspection MagicMethodsValidityInspection
+     */
+    public function __get(string $childName): string {
         if (!array_key_exists($childName, $this->renderedChildren))
             throw new RuntimeException("Rendered child unavailable: `$childName`");
 
         return $this->renderedChildren[$childName];
-	}
+    }
 
     /**
-	 * @var string
-	 */
-	protected(set) string $renderer = PhpRenderer::class;
+     * The class responsible for rendering views.
+     *
+     * @var string
+     * @access protected (set)
+     */
+    protected(set) string $renderer = PhpRenderer::class;
 
     /**
      * Adds a child HttpModel to the current model with the specified name.
@@ -128,4 +136,20 @@ class HttpModel extends AbstractModel {
             $this->rendering = false;
         }
     }
+
+    #region Helpers
+
+    /**
+     * Escapes a string for safe output in HTML.
+     *
+     * @param mixed $string The input to be escaped. It will be cast to a string if not already one.
+     *
+     * @return string The escaped string, safe for inclusion in HTML.
+     *
+     * @throws \Exception If encoding is unsupported by htmlspecialchars.
+     */
+    protected function escape(mixed $string): string {
+        return htmlspecialchars((string)$string, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    }
+    #endregion Helpers
 }
