@@ -1,14 +1,9 @@
 inanepain/view:
 	View layer with models for the most common content types.
-	View Models:
-		- Abstract Model
-			- HTML Model
-			- JSON Model
-			- Text Model
-		- View Manager
-		Elements:
-			A collection of html element objects
-			- HeadTitle
-			- HeadScript
-			- HeadStyle
-			- Anchor
+	- git-attributes @done(2026-10-03)
+	Elements:
+		A collection of html element objects
+		- HeadTitle
+		- HeadScript
+		- HeadStyle
+		- Anchor
