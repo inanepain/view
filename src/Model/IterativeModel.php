@@ -1,4 +1,25 @@
 <?php
+
+/**
+ * Inane: IterativeModel
+ *
+ * Inane Library
+ *
+ * $Id$
+ * $Date$
+ *
+ * PHP version 8.5
+ *
+ * @author   Philip Michael Raab <philip@cathedral.co.za>
+ * @package  inanepain\view
+ * @category view
+ *
+ * @license  UNLICENSE
+ * @license  https://unlicense.org/UNLICENSE UNLICENSE
+ *
+ * _version_ $version
+ */
+
 declare(strict_types=1);
 
 namespace Inane\View\Model;
@@ -6,6 +27,9 @@ namespace Inane\View\Model;
 use Inane\Stdlib\Array\OptionsInterface;
 use Inane\View\Exception\RuntimeException;
 use Inane\View\Renderer\PhpRenderer;
+
+use function array_merge;
+use function is_array;
 
 /**
  * Repeats an HTTP template for each variable set.
@@ -26,7 +50,7 @@ class IterativeModel extends HttpModel {
     public function __construct(iterable $items = [], array $variables = [], array|OptionsInterface $options = []) {
         $rows = [];
         foreach ($items as $item) {
-            if (!is_array($item)) throw new RuntimeException('View items must be arrays of template variables.');
+            if (!is_array($item)) throw new RuntimeException('View items must be arrayed of template variables.');
             $rows[] = $item;
         }
         $this->items = $rows;

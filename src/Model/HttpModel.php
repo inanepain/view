@@ -123,9 +123,10 @@ class HttpModel extends AbstractModel {
 
         $this->rendering = true;
         try {
-            $context = clone $this;
-            $context->renderedChildren = [];
-            $context->variables = array_merge($this->variables, $data);
+            $context = clone($this, [
+                'renderedChildren' => [],
+                'variables'        => array_merge($this->variables, $data)
+            ]);
             foreach ($this->children as $name => $child)
                 $context->renderedChildren[$name] = $child->render($renderer, array_merge($context->variables, $child->variables));
 
