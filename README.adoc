@@ -54,6 +54,82 @@ PHP templates rendered without an explicit context object have the renderer avai
 
 String templates retain the `{$name}` placeholder syntax. Values may be scalar, null or stringable. Inserted output is literal: backslashes, dollar signs and placeholders within child output are not interpreted again. Unknown placeholders are retained. Render child partials first and pass their output as parent variables. Output is not automatically HTML-escaped.
 
+=== PHP Partials and Collections
+
+Create these templates in a `templates` directory beside the calling script. Escape text values in the templates; rendered child markup is inserted directly.
+
+.templates/item.phtml
+[source,php]
+----
+<?php declare(strict_types=1);?>
+<li><?= htmlspecialchars($name, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></li>
+----
+
+.templates/list.phtml
+[source,php]
+----
+<?php declare(strict_types=1); ?>
+<ul><?= $this->renderEach('item', $items) ?></ul>
+----
+
+.Calling script (after loading the Composer autoloader)
+[source,php]
+----
+<?php
+declare(strict_types=1);
+
+use Inane\View\Renderer\PhpRenderer;
+
+$renderer = new PhpRenderer(__DIR__ . '/templates');
+
+echo $renderer->renderPartial('item', ['name' => 'Ada']);
+echo $renderer->render('list', [
+    'items' => [
+        ['name' => 'Ada'],
+        ['name' => 'Grace'],
+    ],
+]);
+----
+
+The first call produces `<li>Ada</li>`. The second produces `<ul><li>Ada</li><li>Grace</li></ul>` (apart from template line endings). Inside `list.phtml`, `$this` is the renderer because no explicit context object was supplied. Each call to `renderEach` renders `item.phtml` with a separate variable array.
+
+=== String Partials and Shared Defaults
+
+String partials resolve names from the template stack. Render the collection first, then pass its markup into the parent placeholder. Escape user-provided values before passing them to the renderer.
+
+[source,php]
+----
+<?php
+declare(strict_types=1);
+
+use Inane\View\Renderer\StringRenderer;
+
+$renderer = new StringRenderer([
+    'item' => '<li>{$name}: {$role}</li>',
+    'list' => '<ul>{$content}</ul>',
+]);
+
+$content = $renderer->renderEach(
+    template: 'item',
+    items: [
+        ['name' => 'Ada'],
+        ['name' => 'Grace', 'role' => 'editor'],
+        ['name' => 'Linus'],
+    ],
+    data: ['role' => 'reader'],
+);
+
+echo $renderer->renderPartial('list', ['content' => $content]);
+----
+
+.Output
+[source,html]
+----
+<ul><li>Ada: reader</li><li>Grace: editor</li><li>Linus: reader</li></ul>
+----
+
+Grace's item overrides the shared `role`, but Linus still receives the shared default. To render the named parent with `render` instead, use `$renderer->render(template: 'list', data: ['content' => $content], useStack: true)`; without `useStack`, `render('list')` returns the literal string `list`.
+
 == Model Trees
 
 `HttpModel::addChild` attaches a named child model. `HttpModel::render` renders children recursively before rendering the parent with a configured `PhpRenderer`. Alternatively, initialise `ViewManager` with that renderer and pass the root model to its `render` method.
@@ -63,5 +139,76 @@ Child output is available both as a variable bearing the child's name and throug
 `IterativeModel` extends `HttpModel` and accepts `items`, shared `variables` and model `options`. Each item is an array of template variables; its values override shared defaults. Every item renders the model's template and child tree, and the resulting strings are concatenated. Iterables are materialised at construction so even generator-backed models can be rendered repeatedly. An empty model produces an empty string.
 
 Models retain their original variables and child models after rendering. Circular model trees throw `Inane\View\Exception\RuntimeException`. Rendering exceptions propagate, output buffers are cleaned, and models can be retried after correcting the failure. Layout and HTTP response handling are not performed by these rendering methods.
+
+=== A Nested Iterative Model
+
+This example attaches an `IterativeModel` to a parent `HttpModel` and gives each repeated row its own child view. Create the following templates in the same `templates` directory.
+
+.templates/page.phtml
+[source,php]
+----
+<?php declare(strict_types=1); ?>
+<h1><?= htmlspecialchars($title, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></h1>
+<ul><?= $rows ?></ul>
+----
+
+.templates/row.phtml
+[source,php]
+----
+<?php declare(strict_types=1); ?>
+<li><?= $this->label ?></li>
+----
+
+.templates/label.phtml
+[source,php]
+----
+<?php declare(strict_types=1); ?>
+<?= htmlspecialchars($name, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>: <?= htmlspecialchars($role, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>
+----
+
+.Calling script (after loading the Composer autoloader)
+[source,php]
+----
+<?php
+declare(strict_types=1);
+
+use Inane\View\Model\HttpModel;
+use Inane\View\Model\IterativeModel;
+use Inane\View\Renderer\PhpRenderer;
+use Inane\View\ViewManager;
+
+$renderer = new PhpRenderer(__DIR__ . '/templates');
+$page = new HttpModel(
+    variables: ['title' => 'Team'],
+    options: ['template' => 'page'],
+);
+$rows = new IterativeModel(
+    items: [
+        ['name' => 'Ada'],
+        ['name' => 'Grace', 'role' => 'editor'],
+    ],
+    variables: ['role' => 'reader'],
+    options: ['template' => 'row'],
+);
+$rows->addChild('label', new HttpModel(options: ['template' => 'label']));
+$page->addChild('rows', $rows);
+
+$manager = new ViewManager($renderer);
+echo $manager->render($page);
+----
+
+.Output (apart from template line endings)
+[source,html]
+----
+<h1>Team</h1>
+<ul>
+    <li>Ada: reader</li>
+    <li>Grace: editor</li>
+</ul>
+----
+
+The `label` child inherits each row's `name` and `role`. Its rendered output is available as `$this->label` in `row.phtml`; `$label` would produce the same output. Likewise, `page.phtml` can use either `$rows` or `$this->rows` for its rendered child. Here `$this` is the bound model context, not the renderer.
+
+Calling `$page->render($renderer)` directly produces the same result as the manager. Explicit variables on the `label` child would override inherited row values. The same model tree can be rendered again, including when the `items` constructor argument is a generator.
 
 :leveloffset!:
