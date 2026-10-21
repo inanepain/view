@@ -28,6 +28,7 @@ use Inane\Http\HttpStatus;
 use Inane\Stdlib\{
     Array\OptionsInterface,
     Options};
+use Inane\View\Renderer\RendererInterface;
 
 use function array_key_exists;
 use function array_merge;
@@ -46,6 +47,15 @@ use function property_exists;
  * - And the renderer used to compile everything
  */
 abstract class AbstractModel implements ModelInterface {
+    /**
+     * HTTP response status code.
+     */
+    protected(set) int $status {
+        get => $this->httpStatus->value;
+        set {
+            $this->httpStatus = HttpStatus::from($value);
+        }
+    }
     #region Option Properties
     /**
      * The HTTP status associated with the model.
@@ -58,13 +68,6 @@ abstract class AbstractModel implements ModelInterface {
     /**
      * @var int http response status
      */
-    protected(set) int $status {
-        get => $this->httpStatus->value;
-        set {
-            $this->httpStatus = HttpStatus::from($value);
-        }
-    }
-
     /**
      * Status message describing the current state or result.
      *
@@ -84,12 +87,19 @@ abstract class AbstractModel implements ModelInterface {
      *
      * @var bool
      */
-    protected(set) bool $useLayout = true;
+    public bool $useLayout = true;
 
     /**
      * @var string
      */
-    protected(set) string $renderer;
+    protected(set) string $rendererClass;
+
+    protected static array $defaultRenderer = [];
+
+    public RendererInterface $rendererInstance {
+        get => static::$defaultRenderer[$this->rendererClass] ??= new $this->rendererClass();
+        set => static::$defaultRenderer[$this->rendererClass] = $value;
+    }
 
     /**
      * The name of the template associated with this model.

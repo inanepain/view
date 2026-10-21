@@ -24,6 +24,9 @@ declare(strict_types=1);
 
 namespace Inane\View\Model;
 
+use Inane\View\Exception\RuntimeException;
+use Inane\View\Renderer\StringRenderer;
+
 /**
  * Class TextModel
  *
@@ -33,12 +36,25 @@ class TextModel extends AbstractModel {
 	/**
 	 * @var array http headers
 	 */
-	protected(set) array $headers = ['content-type' => 'plain/text'];
+	protected(set) array $headers = ['content-type' => 'text/plain; charset=UTF-8'];
 
     /**
 	 * @var bool
 	 */
-	protected(set) bool $useLayout = false;
+	public bool $useLayout = false;
 
-    protected string $template = '{text}';
+    protected string $template = '{$text}';
+
+    protected(set) string $rendererClass = StringRenderer::class;
+
+    /**
+     * Renders the model as plain text.
+     *
+     * @return string Rendered text.
+     *
+     * @throws RuntimeException If a template variable cannot be rendered.
+     */
+    public function render(): string {
+        return $this->rendererInstance->render($this->template, $this->variables);
+    }
 }

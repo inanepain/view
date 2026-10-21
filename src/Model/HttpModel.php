@@ -89,7 +89,7 @@ class HttpModel extends AbstractModel {
      * @var string
      * @access protected (set)
      */
-    protected(set) string $renderer = PhpRenderer::class;
+    protected(set) string $rendererClass = PhpRenderer::class;
 
     /**
      * Adds a child HttpModel to the current model with the specified name.
@@ -110,7 +110,6 @@ class HttpModel extends AbstractModel {
     /**
      * Renders children before the parent, without changing model variables.
      *
-     * @param PhpRenderer $renderer Renderer used throughout the tree.
      * @param array<string, mixed> $data Overrides containing arbitrary template variables.
      *
      * @return string Rendered model.
@@ -118,7 +117,7 @@ class HttpModel extends AbstractModel {
      * @throws RuntimeException If a circular tree or invalid template is encountered.
      * @throws \Throwable If template execution fails.
      */
-    public function render(PhpRenderer $renderer, array $data = []): string {
+    public function render(?array $data = []): string {
         if ($this->rendering) throw new RuntimeException('Circular view model tree.');
 
         $this->rendering = true;
@@ -128,11 +127,12 @@ class HttpModel extends AbstractModel {
                 'variables'        => array_merge($this->variables, $data)
             ]);
             foreach ($this->children as $name => $child)
-                $context->renderedChildren[$name] = $child->render($renderer, array_merge($context->variables, $child->variables));
+                $context->renderedChildren[$name] = $child->render(array_merge($context->variables, $child->variables));
 
             $context->variables = array_merge($context->variables, $context->renderedChildren);
 
-            return $renderer->render($this->template, $context->variables, $context);
+            return $this->rendererInstance->render($this->template, $context->variables, $context);
+//            return $renderer->render($this->template, $context->variables, $context);
         } finally {
             $this->rendering = false;
         }

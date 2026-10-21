@@ -44,7 +44,8 @@ class ViewManager {
      *
      * @param PhpRenderer|null $renderer Configured template renderer.
      */
-    public function __construct(private readonly ?PhpRenderer $renderer = null) {
+    public function __construct(public readonly ?PhpRenderer $renderer = null) {
+        
     }
 
     /**

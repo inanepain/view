@@ -34,7 +34,7 @@ interface ModelInterface {
 	/**
 	 * Represents whether the layout is used or not.
 	 */
-	protected(set) bool $useLayout {
+	public bool $useLayout {
         get;
         set;
     }
@@ -45,6 +45,15 @@ interface ModelInterface {
 	 * @return OptionsInterface The Options object implementing OptionsInterface.
 	 */
 	public function getOptions(): OptionsInterface;
+
+    /**
+     * Renders the model content.
+     *
+     * @return string Rendered content.
+     *
+     * @throws \Throwable If rendering fails.
+     */
+    public function render(): string;
     
     /**
 	 * Sets an option for the model.

@@ -168,8 +168,9 @@ final class RendererTest extends TestCase {
     public function testChildVariables(): void {
         $renderer = new PhpRenderer(__DIR__ . '/templates');
         $parent = new HttpModel(variables: ['name' => 'parent', 'content' => 'shadowed'], options: ['template' => 'variable']);
+        $parent->rendererInstance = $renderer;
         $parent->addChild('content', new HttpModel(variables: ['name' => 'child'], options: ['template' => 'item']));
-        self::assertSame('parent:[child]', $parent->render($renderer));
+        self::assertSame('parent:[child]', $parent->render());
     }
 
     /**
@@ -204,11 +205,13 @@ final class RendererTest extends TestCase {
     public function testCircularModels(): void {
         $renderer = new PhpRenderer(__DIR__ . '/templates');
         $parent = new HttpModel(options: ['template' => 'wrapper']);
+        $parent->rendererInstance = $renderer;
         $child = new HttpModel(options: ['template' => 'wrapper']);
+        $child->rendererInstance = $renderer;
         $parent->addChild('content', $child);
         $child->addChild('content', $parent);
         $this->expectException(RuntimeException::class);
-        $parent->render($renderer);
+        $parent->render();
     }
 
     /**
@@ -219,13 +222,14 @@ final class RendererTest extends TestCase {
     public function testModelRecoversAfterFailure(): void {
         $renderer = new PhpRenderer(__DIR__ . '/templates');
         $model = new HttpModel(options: ['template' => 'missing']);
+        $model->rendererInstance = $renderer;
         try {
-            $model->render($renderer);
+            $model->render();
             self::fail('A missing template must throw.');
         } catch (RuntimeException) {
             $model->setOption('template', 'item');
         }
-        self::assertSame('[recovered]', $model->render($renderer, ['name' => 'recovered']));
+        self::assertSame('[recovered]', $model->render(['name' => 'recovered']));
     }
 
     /**

@@ -26,7 +26,6 @@ namespace Inane\View\Model;
 
 use Inane\Stdlib\Array\OptionsInterface;
 use Inane\View\Exception\RuntimeException;
-use Inane\View\Renderer\PhpRenderer;
 
 use function array_merge;
 use function is_array;
@@ -60,7 +59,6 @@ class IterativeModel extends HttpModel {
     /**
      * Concatenates rows, with item variables overriding shared variables.
      *
-     * @param PhpRenderer $renderer Renderer used throughout the tree.
      * @param array<string, mixed> $data Shared overrides containing arbitrary template variables.
      *
      * @return string Rendered rows, or an empty string for no items.
@@ -68,10 +66,10 @@ class IterativeModel extends HttpModel {
      * @throws RuntimeException If a circular tree or invalid template is encountered.
      * @throws \Throwable If template execution fails.
      */
-    public function render(PhpRenderer $renderer, array $data = []): string {
+    public function render(array|null $data = []): string {
         $output = '';
         foreach ($this->items as $item)
-            $output .= parent::render($renderer, array_merge($data, $item));
+            $output .= parent::render(array_merge($data, $item));
 
         return $output;
     }
