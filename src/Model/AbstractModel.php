@@ -28,7 +28,6 @@ use Inane\Http\HttpStatus;
 use Inane\Stdlib\{
     Array\OptionsInterface,
     Options};
-use Inane\View\Renderer\RendererInterface;
 
 use function array_key_exists;
 use function array_merge;
@@ -46,7 +45,7 @@ use function property_exists;
  * - Which, if any, template to use
  * - And the renderer used to compile everything
  */
-abstract class AbstractModel implements ModelInterface {
+abstract class AbstractModel implements ViewModelInterface {
     /**
      * HTTP response status code.
      */
@@ -83,30 +82,17 @@ abstract class AbstractModel implements ModelInterface {
     protected(set) array $headers = [];
 
     /**
+     * @var array<string, mixed> Model data.
+     */
+    public protected(set) array $variables = [];
+
+    /**
      * Indicates whether the layout should be used when rendering views.
      *
      * @var bool
      */
     public bool $useLayout = true;
 
-    /**
-     * @var string
-     */
-    protected(set) string $rendererClass;
-
-    protected static array $defaultRenderer = [];
-
-    public RendererInterface $rendererInstance {
-        get => static::$defaultRenderer[$this->rendererClass] ??= new $this->rendererClass();
-        set => static::$defaultRenderer[$this->rendererClass] = $value;
-    }
-
-    /**
-     * The name of the template associated with this model.
-     *
-     * @var string
-     */
-    protected string $template = '';
     #endregion Option Properties
 
     /**
@@ -117,8 +103,6 @@ abstract class AbstractModel implements ModelInterface {
         'status',
         'headers',
         'useLayout',
-        'renderer',
-        'template',
     ];
 
     /**
@@ -132,12 +116,13 @@ abstract class AbstractModel implements ModelInterface {
         /**
          * @var array view variables
          */
-        protected(set) array $variables = [],
+        array $variables = [],
         /**
          * @var array options model and renderer options
          */
         array|OptionsInterface $options = [],
     ) {
+        $this->variables = $variables;
         $this->setOptions($options);
     }
 
@@ -155,6 +140,9 @@ abstract class AbstractModel implements ModelInterface {
 
         return null;
     }
+
+    /** @return array<string, mixed> */
+
     #endregion Variable Methods
 
     #region Option Methods

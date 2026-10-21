@@ -31,14 +31,9 @@ use Inane\Stdlib\Array\OptionsInterface;
  * Interface Model
  */
 interface ModelInterface {
-	/**
-	 * Represents whether the layout is used or not.
-	 */
-	public bool $useLayout {
-        get;
-        set;
-    }
-
+	public int $status { get; }
+	public array $headers { get; }
+	public array $variables { get; }
     /**
 	 * Retrieves the options associated with the model.
 	 *
@@ -46,15 +41,6 @@ interface ModelInterface {
 	 */
 	public function getOptions(): OptionsInterface;
 
-    /**
-     * Renders the model content.
-     *
-     * @return string Rendered content.
-     *
-     * @throws \Throwable If rendering fails.
-     */
-    public function render(): string;
-    
     /**
 	 * Sets an option for the model.
 	 *

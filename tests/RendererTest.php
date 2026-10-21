@@ -25,8 +25,8 @@ declare(strict_types=1);
 namespace Inane\View\Tests;
 
 use Inane\View\Exception\RuntimeException;
-use Inane\View\Model\HttpModel;
-use Inane\View\Model\IterativeModel;
+use Inane\View\IterativeView;
+use Inane\View\Model\HtmlModel;
 use Inane\View\Renderer\PhpRenderer;
 use Inane\View\Renderer\StringRenderer;
 use Inane\View\ViewManager;
@@ -148,15 +148,14 @@ final class RendererTest extends TestCase {
      */
     public function testNestedModels(): void {
         $renderer = new PhpRenderer(__DIR__ . '/templates');
-        $rows = new IterativeModel(items: [['name' => 'one'], ['name' => 'two']], options: ['template' => 'item']);
-        $inner = new HttpModel(options: ['template' => 'wrapper']);
+        $rows = $this->iterative($renderer, [['name' => 'one'], ['name' => 'two']], 'item');
+        $inner = new \Inane\View\HtmlView($renderer, new HtmlModel(options: ['template' => 'wrapper']));
         $inner->addChild('content', $rows);
-        $outer = new HttpModel(options: ['template' => 'wrapper']);
+        $outer = new \Inane\View\HtmlView($renderer, new HtmlModel(options: ['template' => 'wrapper']));
         $outer->addChild('content', $inner);
-        $manager = new ViewManager($renderer);
 
-        self::assertSame('<<[one][two]>>', $manager->render($outer));
-        self::assertSame('<<[one][two]>>', $manager->render($outer));
+        self::assertSame('<<[one][two]>>', $outer->render());
+        self::assertSame('<<[one][two]>>', $outer->render());
         self::assertSame([], $rows->variables);
     }
 
@@ -167,9 +166,8 @@ final class RendererTest extends TestCase {
      */
     public function testChildVariables(): void {
         $renderer = new PhpRenderer(__DIR__ . '/templates');
-        $parent = new HttpModel(variables: ['name' => 'parent', 'content' => 'shadowed'], options: ['template' => 'variable']);
-        $parent->rendererInstance = $renderer;
-        $parent->addChild('content', new HttpModel(variables: ['name' => 'child'], options: ['template' => 'item']));
+        $parent = new \Inane\View\HtmlView($renderer, new HtmlModel(variables: ['name' => 'parent', 'content' => 'shadowed'], options: ['template' => 'variable']));
+        $parent->addChild('content', new \Inane\View\HtmlView($renderer, new HtmlModel(variables: ['name' => 'child'], options: ['template' => 'item'])));
         self::assertSame('parent:[child]', $parent->render());
     }
 
@@ -179,7 +177,7 @@ final class RendererTest extends TestCase {
      * @throws \Throwable
      */
     public function testModelOptions(): void {
-        $model = new HttpModel(options: ['useLayout' => false, 'template' => 'item']);
+        $model = new HtmlModel(options: ['useLayout' => false, 'template' => 'item']);
         self::assertFalse($model->useLayout);
         self::assertSame('item', $model->template);
     }
@@ -189,12 +187,12 @@ final class RendererTest extends TestCase {
      *
      * @throws \Throwable
      */
-    public function testIterativeModelDefaults(): void {
+    public function testIterativeViewDefaults(): void {
         $renderer = new PhpRenderer(__DIR__ . '/templates');
-        $model = new IterativeModel(items: [['name' => 'one'], []], variables: ['name' => 'default'], options: ['template' => 'item']);
-        self::assertSame('[one][default]', $model->render($renderer));
-        self::assertSame('[one][default]', $model->render($renderer));
-        self::assertSame('', new IterativeModel(items: [], options: ['template' => 'item'])->render($renderer));
+        $model = $this->iterative($renderer, [['name' => 'one'], []], 'item', ['name' => 'default']);
+        self::assertSame('[one][default]', $model->render());
+        self::assertSame('[one][default]', $model->render());
+        self::assertSame('', $this->iterative($renderer, [], 'item')->render());
     }
 
     /**
@@ -204,10 +202,8 @@ final class RendererTest extends TestCase {
      */
     public function testCircularModels(): void {
         $renderer = new PhpRenderer(__DIR__ . '/templates');
-        $parent = new HttpModel(options: ['template' => 'wrapper']);
-        $parent->rendererInstance = $renderer;
-        $child = new HttpModel(options: ['template' => 'wrapper']);
-        $child->rendererInstance = $renderer;
+        $parent = new \Inane\View\HtmlView($renderer, new HtmlModel(options: ['template' => 'wrapper']));
+        $child = new \Inane\View\HtmlView($renderer, new HtmlModel(options: ['template' => 'wrapper']));
         $parent->addChild('content', $child);
         $child->addChild('content', $parent);
         $this->expectException(RuntimeException::class);
@@ -221,15 +217,15 @@ final class RendererTest extends TestCase {
      */
     public function testModelRecoversAfterFailure(): void {
         $renderer = new PhpRenderer(__DIR__ . '/templates');
-        $model = new HttpModel(options: ['template' => 'missing']);
-        $model->rendererInstance = $renderer;
+        $model = new HtmlModel(options: ['template' => 'missing']);
+        $view = (new ViewManager($renderer))->createView($model);
         try {
-            $model->render();
+            $view->render();
             self::fail('A missing template must throw.');
         } catch (RuntimeException) {
             $model->setOption('template', 'item');
         }
-        self::assertSame('[recovered]', $model->render(['name' => 'recovered']));
+        self::assertSame('[recovered]', $view->render());
     }
 
     /**
@@ -239,12 +235,12 @@ final class RendererTest extends TestCase {
      */
     public function testNestedChildrenWithinIteration(): void {
         $renderer = new PhpRenderer(__DIR__ . '/templates');
-        $model = new IterativeModel(items: [['name' => 'one'], ['name' => 'two']], options: ['template' => 'wrapper']);
-        $model->addChild('content', new HttpModel(options: ['template' => 'item']));
-        self::assertSame('<[one]><[two]>', $model->render($renderer));
+        $model = $this->iterative($renderer, [['name' => 'one'], ['name' => 'two']], 'wrapper');
+        $model->addChild('content', new \Inane\View\HtmlView($renderer, new HtmlModel(options: ['template' => 'item'])));
+        self::assertSame('<[one]><[two]>', $model->render());
 
-        $model->addChild('content', new HttpModel(variables: ['name' => 'fixed'], options: ['template' => 'item']));
-        self::assertSame('<[fixed]><[fixed]>', $model->render($renderer));
+        $model->addChild('content', new \Inane\View\HtmlView($renderer, new HtmlModel(variables: ['name' => 'fixed'], options: ['template' => 'item'])));
+        self::assertSame('<[fixed]><[fixed]>', $model->render());
     }
 
     /**
@@ -257,10 +253,10 @@ final class RendererTest extends TestCase {
             yield ['name' => 'one'];
             yield ['name' => 'two'];
         })();
-        $model = new IterativeModel(items: $items, options: ['template' => 'item']);
         $renderer = new PhpRenderer(__DIR__ . '/templates');
-        self::assertSame('[one][two]', $model->render($renderer));
-        self::assertSame('[one][two]', $model->render($renderer));
+        $model = $this->iterative($renderer, $items, 'item');
+        self::assertSame('[one][two]', $model->render());
+        self::assertSame('[one][two]', $model->render());
     }
 
     /**
@@ -270,7 +266,11 @@ final class RendererTest extends TestCase {
      */
     public function testInvalidModelRow(): void {
         $this->expectException(RuntimeException::class);
-        new IterativeModel(['invalid']);
+        $this->iterative(new PhpRenderer(__DIR__ . '/templates'), ['invalid'], 'item');
+    }
+
+    private function iterative(PhpRenderer $renderer, iterable $items, string $template, array $variables = []): IterativeView {
+        return new IterativeView($renderer, new HtmlModel($variables, ['template' => $template]), $items);
     }
 
     /**
@@ -280,7 +280,7 @@ final class RendererTest extends TestCase {
      */
     public function testUnconfiguredManager(): void {
         $this->expectException(RuntimeException::class);
-        new ViewManager()->render(new HttpModel());
+        new ViewManager()->render(new HtmlModel());
     }
 
     /**

@@ -24,9 +24,6 @@ declare(strict_types=1);
 
 namespace Inane\View\Model;
 
-use Inane\Stdlib\Json;
-use Inane\View\Exception\RuntimeException;
-use JsonException;
 
 /**
  * Class JsonModel
@@ -39,18 +36,4 @@ class JsonModel extends AbstractModel {
 	 */
 	protected(set) array $headers = ['content-type' => 'application/json'];
 
-    /**
-     * Encodes model variables as JSON.
-     *
-     * @return string Encoded JSON.
-     *
-     * @throws RuntimeException|\Inane\Stdlib\Exception\JsonException If the model variables cannot be encoded.
-     */
-    public function render(): string {
-        try {
-            return Json::encode($this->variables);
-        } catch (JsonException $exception) {
-            throw new RuntimeException('JSON model variables could not be encoded.', previous: $exception);
-        }
-    }
 }

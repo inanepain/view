@@ -26,8 +26,7 @@ namespace Inane\View;
 
 use Inane\Config\ConfigAware\ConfigAwareAttribute;
 use Inane\Config\ConfigAware\ConfigAwareTrait;
-use Inane\View\Exception\RuntimeException;
-use Inane\View\Model\HttpModel;
+use Inane\View\Model\ViewModelInterface;
 use Inane\View\Renderer\PhpRenderer;
 
 /**
@@ -49,18 +48,30 @@ class ViewManager {
     }
 
     /**
-     * Renders a nested or iterative HTTP view model.
+     * Creates a view for a model.
      *
-     * @param HttpModel $model Root view model.
+     * @param ViewModelInterface $model Root view model.
      *
-     * @return string Rendered view tree.
+     * @return View Created view.
      *
-     * @throws RuntimeException If no renderer is configured or rendering fails.
+     * @throws RuntimeException If view creation fails.
      * @throws \Throwable If template execution fails.
      */
-    public function render(HttpModel $model): string {
-        if ($this->renderer === null) throw new RuntimeException('A PHP renderer is required to render view models.');
+    public function createView(ViewModelInterface $model): View {
+        return ViewFactory::createForModel($model, $this->renderer);
+    }
 
-        return $model->render($this->renderer);
+    /**
+     * Creates and renders the view for a model.
+     *
+     * @param ViewModelInterface $model Root view model.
+     *
+     * @return string Rendered content.
+     *
+     * @throws RuntimeException If view creation or rendering fails.
+     * @throws \Throwable If template execution fails.
+     */
+    public function render(ViewModelInterface $model): string {
+        return $this->createView($model)->render();
     }
 }

@@ -132,17 +132,17 @@ Grace's item overrides the shared `role`, but Linus still receives the shared de
 
 == Model Trees
 
-`HttpModel::addChild` attaches a named child model. `HttpModel::render` renders children recursively before rendering the parent with a configured `PhpRenderer`. Alternatively, initialise `ViewManager` with that renderer and pass the root model to its `render` method.
+`HtmlView::addChild` attaches a named child view. `HtmlView::render` renders child views recursively before rendering the parent model with a configured `PhpRenderer`. `HtmlModel` contains template data and options only.
 
 Child output is available both as a variable bearing the child's name and through `$this` on the bound model context. Rendered children override parent variables with the same name. Children inherit parent variables, including iteration variables, but explicitly supplied child variables take precedence. Child-property access outside a rendering context throws `Inane\View\Exception\RuntimeException`.
 
-`IterativeModel` extends `HttpModel` and accepts `items`, shared `variables` and model `options`. Each item is an array of template variables; its values override shared defaults. Every item renders the model's template and child tree, and the resulting strings are concatenated. Iterables are materialised at construction so even generator-backed models can be rendered repeatedly. An empty model produces an empty string.
+`IterativeView` extends `HtmlView` and accepts `items`, shared `variables` and model `options`. Each item is an array of template variables; its values override shared defaults. Every item renders the model's template and child tree, and the resulting strings are concatenated. Iterables are materialised at construction so even generator-backed models can be rendered repeatedly. An empty model produces an empty string.
 
-Models retain their original variables and child models after rendering. Circular model trees throw `Inane\View\Exception\RuntimeException`. Rendering exceptions propagate, output buffers are cleaned, and models can be retried after correcting the failure. Layout and HTTP response handling are not performed by these rendering methods.
+Models retain their original variables and child views after rendering. Circular view trees throw `Inane\View\Exception\RuntimeException`. Rendering exceptions propagate, output buffers are cleaned, and models can be retried after correcting the failure. Layout and HTTP response handling are not performed by these rendering methods.
 
 === A Nested Iterative Model
 
-This example attaches an `IterativeModel` to a parent `HttpModel` and gives each repeated row its own child view. Create the following templates in the same `templates` directory.
+This example attaches an `IterativeView` to a parent `HtmlModel` and gives each repeated row its own child view. Create the following templates in the same `templates` directory.
 
 .templates/page.phtml
 [source,php]
@@ -172,17 +172,17 @@ This example attaches an `IterativeModel` to a parent `HttpModel` and gives each
 <?php
 declare(strict_types=1);
 
-use Inane\View\Model\HttpModel;
-use Inane\View\Model\IterativeModel;
+use Inane\View\Model\HtmlModel;
+use Inane\View\IterativeView;
 use Inane\View\Renderer\PhpRenderer;
 use Inane\View\ViewManager;
 
 $renderer = new PhpRenderer(__DIR__ . '/templates');
-$page = new HttpModel(
+$page = new HtmlModel(
     variables: ['title' => 'Team'],
     options: ['template' => 'page'],
 );
-$rows = new IterativeModel(
+$rows = new IterativeView(
     items: [
         ['name' => 'Ada'],
         ['name' => 'Grace', 'role' => 'editor'],
@@ -190,7 +190,7 @@ $rows = new IterativeModel(
     variables: ['role' => 'reader'],
     options: ['template' => 'row'],
 );
-$rows->addChild('label', new HttpModel(options: ['template' => 'label']));
+$rows->addChild('label', new HtmlModel(options: ['template' => 'label']));
 $page->addChild('rows', $rows);
 
 $manager = new ViewManager($renderer);
