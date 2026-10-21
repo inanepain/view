@@ -28,6 +28,7 @@ use Inane\Config\ConfigAware\ConfigAwareAttribute;
 use Inane\Config\ConfigAware\ConfigAwareTrait;
 use Inane\View\Model\ViewModelInterface;
 use Inane\View\Renderer\PhpRenderer;
+use RuntimeException;
 
 /**
  * Class View
@@ -44,7 +45,7 @@ class ViewManager {
      * @param PhpRenderer|null $renderer Configured template renderer.
      */
     public function __construct(public readonly ?PhpRenderer $renderer = null) {
-        
+
     }
 
     /**
